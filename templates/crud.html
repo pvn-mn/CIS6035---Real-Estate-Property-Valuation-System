@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% include 'header.html' %} <!-- Assuming because the crud imports from both the header (css/index.css) & base (style.css) it renders header nad crud accordingly-->
+
+{% block title %} project Management {% endblock %}
+
+{% block body %}
+
+<style>
+
+    .custom-section {
+        background-color: #f8f9fa; /* Light background specific to this container */
+        padding: 20px;
+        border-radius: 10px;
+    }
+    
+    .custom-section .card-container {
+        background-color: #ffffff; /* White background for each card */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow effect */
+        border-radius: 8px; /* Rounded corners for each card */
+        transition: transform 0.3s ease; /* Smooth transition for hover effect */
+    }
+    
+    .custom-section .card-container:hover {
+        transform: scale(1.05); /* Slight scale up on hover */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
+    }
+    
+</style>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+
+            <div class="jumbotron p-3 mt-3">
+                <h2>Dashboard
+                    <button type="button" class="btn btn-outline-primary float-end" data-bs-toggle="modal" data-bs-target="#mymodal">Add New projects</button>
+                </h2>
+
+                <!-- Display flash messages -->
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-success alert-dismissible fade show custom-alert" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+            </div>
+
+            <!-- Cards for each project -->
+            <div class="container custom-section  mt-5">
+                <div class="row">
+                    {% for row in projects %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card-container border p-3">
+                            <h5 class="card-title">ID: {{ row.id }}</h5>
+                            <h5 class="card-title">Name: {{ row.name }}</h5>
+                            <h5 class="card-title">Email: {{ row.email }}</h5>
+                            <h5 class="card-title">Phone: {{ row.phone }}</h5>
+
+                            <div class="card-buttons mt-3">
+                                <!-- Edit button triggers modal -->
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modaledit{{ row.id }}">
+                                    <i class="fas fa-edit"></i> <!-- Edit Icon -->
+                                </button>
+                                <!-- Delete button confirms before deletion -->
+                                <a href="/delete/{{ row.id }}" class="btn btn-danger" onclick="return confirm('Are you sure to delete?')">
+                                    <i class="fas fa-trash-alt"></i> <!-- Delete Icon -->
+                                </a>
+                                <!-- Predict button redirects to another page -->
+                                <a href="/predict/{{ row.id }}" class="btn btn-warning">
+                                    Predict
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal - Edit -->
+                    <div id="modaledit{{ row.id }}" class="modal fade" tabindex="-1" aria-labelledby="editprojectModalLabel{{ row.id }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title" id="editprojectModalLabel{{ row.id }}">Update Information</h4>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form action="{{ url_for('update') }}" method="post">
+                                        <input type="hidden" name="id" value="{{ row.id }}">
+                                        <div class="form-group">
+                                            <label>Name:</label>
+                                            <input type="text" class="form-control" name="name" value="{{ row.name }}">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Email address:</label>
+                                            <input type="email" class="form-control" name="email" value="{{ row.email }}">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Phone:</label>
+                                            <input type="number" class="form-control" name="phone" value="{{ row.phone }}">
+                                        </div>
+                                        <div class="form-group mt-3">
+                                            <button type="submit" class="btn btn-primary">Update</button>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Modal - Add New project -->
+        <div id="mymodal" class="modal fade" tabindex="-1" aria-labelledby="addprojectModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="addprojectModalLabel">Add project</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="{{ url_for('insert') }}" method="post">
+                            <div class="form-group">
+                                <label>Name:</label>
+                                <input type="text" class="form-control" name="name" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Email address:</label>
+                                <input type="email" class="form-control" name="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Phone:</label>
+                                <input type="number" class="form-control" name="phone" required>
+                            </div>
+                            <div class="form-group mt-3">
+                                <button type="submit" class="btn btn-primary">Add project</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

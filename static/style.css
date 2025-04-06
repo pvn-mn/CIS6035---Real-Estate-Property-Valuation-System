@@ -1,0 +1,21 @@
+/* to reduce font size in (table, modal) index.html */
+.table {
+    font-size: 14px; 
+}
+.modal-content {
+    font-size: 14px; 
+}
+.form-group {
+    margin-top: 30px;
+}
+
+/* to reduce the flash message size */
+.custom-alert {
+    font-size: 0.875rem; 
+    padding: 1rem 1rem; 
+    margin-top: 1rem;
+}
+
+.custom-alert .btn-close {
+    font-size: 1rem; 
+}

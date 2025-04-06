@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Utah Locations Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        /* Global styling */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: row; /* Ensure that the form and map are side-by-side */
+            margin: 0;
+            padding: 0;
+            height: 100vh; /* Full viewport height */
+            overflow: hidden; /* Prevent scrolling */
+        }
+
+        /* Styling for form container */
+        #form-container {
+            width: 50%;
+            padding: 50px;
+            box-sizing: border-box;
+            overflow-y: auto; /* Enable scrolling if the form content overflows */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* Align form content to the top */
+        }
+
+        /* Overall styling for the form */
+        #feature-inputs {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            font-family: Arial, sans-serif;
+        }
+
+
+        
+        /* Styling the label */
+        #form-container label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        /* Styling the select dropdown */
+        #location-select {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            box-sizing: border-box;
+            appearance: none; /* Removes the default arrow for custom styling */
+            background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><polygon fill="%23333" points="5 8 10 13 15 8"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 12px;
+            cursor: pointer;
+        }
+
+        /* Style changes when the dropdown is focused */
+        #location-select:focus {
+            border-color: #007BFF;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+            outline: none;
+        }
+
+        /* Styling the options in the dropdown */
+        #location-select option {
+            padding: 10px;
+            font-size: 16px;
+        }
+
+
+
+        /* Styling for each input group */
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        /* Label styling */
+        .input-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        /* Input field styling */
+        .input-group input[type="number"],
+        .input-group select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input[type="number"]:focus,
+        .input-group select:focus {
+            border-color: #007BFF;
+        }
+
+        /* Slider input styling */
+        .input-group input[type="range"] {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        /* Slider value display */
+        .slider-value {
+            font-size: 14px;
+            margin-top: 5px;
+            text-align: right;
+            color: #666;
+        }
+
+        /* Basic slider styling */
+        input[type="range"] {
+            width: 100%;
+            -webkit-appearance: none; /* Remove default styling */
+            appearance: none;
+            height: 8px;
+            background: #ff9900; /* Orange track */
+            border-radius: 5px;
+            outline: none;
+        }
+
+        /* Slider thumb */
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #ff6600; /* Orange thumb */
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #ff6600; /* Orange thumb */
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        /* Button styling */
+        button[type="submit"] {
+            width: 100%;
+            padding: 12px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        /* Map container styling */
+        #map {
+            width: 50%;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+    </style>
+
+    
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const locations = {
+                "Salt Lake City": { lat: 40.7608, lng: -111.8910 },
+                "Provo": { lat: 40.2338, lng: -111.6585 },
+                "Ogden": { lat: 41.2230, lng: -111.9738 },
+                "Park City": { lat: 40.6461, lng: -111.4980 }
+            };
+
+            const map = L.map('map').setView([39.3200, -111.0937], 8);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            const marker = L.marker([39.3200, -111.0937]).addTo(map);
+
+            document.getElementById('location-select').addEventListener('change', function () {
+                const selectedLocation = this.value;
+                if (selectedLocation) {
+                    const location = locations[selectedLocation];
+                    map.setView([location.lat, location.lng], 12);
+                    marker.setLatLng([location.lat, location.lng]);
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <div id="form-container">
+        <h1>Input Property Details</h1>
+        
+        <label for="location-select">Select location:</label>
+        <select id="location-select" name="location" required>
+            <option value="">--Select a location--</option>
+            <option value="Salt Lake City">Salt Lake City</option>
+            <option value="Provo">Provo</option>
+            <option value="Ogden">Ogden</option>
+            <option value="Park City">Park City</option>
+        </select>
+    
+        <br><br>
+        <!-- Use url_for to generate the action URL with the correct id -->
+        <form method="POST" action="{{ url_for('predict', id=project.id) }}">
+            <div id="feature-inputs">
+                <div class="input-group">
+                    <label for="beds">Number of Beds:</label>
+                    <input type="number" id="beds" name="beds" min="0" step="1" required>
+                </div>
+        
+                <br><br>
+        
+                <div class="input-group">
+                    <label for="baths">Number of Baths:</label>
+                    <input type="number" id="baths" name="baths" min="0" step="1" required>
+                </div>
+        
+                <br><br>
+        
+                <div class="input-group">
+                    <label for="garage">Garage Spaces:</label>
+                    <input type="number" id="garage" name="garage" min="0" step="1" required>
+                </div>
+        
+                <br><br>
+        
+                <div class="input-group">
+                    <label for="sqft">Square Feet:</label>
+                    <input type="range" id="sqft" name="sqft" min="0" max="10000" step="10" value="5000" oninput="updateSliderValue(this.value)">
+                    <div class="slider-value" id="sqft-value">5000</div>
+                </div>
+        
+                <br><br>
+        
+                <div class="input-group">
+                    <label for="stories">Number of Stories:</label>
+                    <select id="stories" name="stories" required>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                    </select>
+                </div>
+        
+                <br><br>
+        
+                <button type="submit">Predict House Price</button>
+            </div>
+        </form>
+    </div>
+    
+    <div id="map"></div>
+
+    <script>
+        // Function to update the displayed square footage value
+        function updateSliderValue(value) {
+            document.getElementById('sqft-value').innerText = value;
+        }
+    </script>
+</body>
+</html>
